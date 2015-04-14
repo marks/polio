@@ -1,4 +1,28 @@
 -- Table Creation Script for Entity Models
+-- psql -U djangoapp -d polio -a -f entity_model.sql
+
+CREATE TABLE entity_allowed_values_table (
+	id serial PRIMARY KEY,
+	name TEXT
+);
+
+CREATE TABLE entity_field_input_type (
+	id serial PRIMARY KEY,
+	name TEXT
+);
+
+CREATE TABLE entity_field_style (
+	table_weight INTEGER,
+	weight_form INTEGER
+);
+
+CREATE TABLE entity_field_data_type (
+	id serial PRIMARY KEY,
+	entity_field_input_type_id INTEGER,
+	FOREIGN KEY (entity_field_input_type_id) REFERENCES entity_field_input_type(id),
+	name TEXT
+);
+
 CREATE TABLE entity_type (
 	id serial PRIMARY KEY,
 	slug VARCHAR(30) NOT NULL UNIQUE, 
@@ -27,11 +51,6 @@ CREATE TABLE entity_field (
 	is_default_sort_field BOOLEAN
 );
 
-CREATE TABLE entity_allowed_values_table (
-	id serial PRIMARY KEY,
-	name TEXT
-);
-
 CREATE TABLE entity_allowed_values_column (
 	id serial PRIMARY KEY,
 	entity_allowed_values_table_id INTEGER,
@@ -41,19 +60,3 @@ CREATE TABLE entity_allowed_values_column (
 	FOREIGN KEY (entity_field_data_type_id) REFERENCES entity_field_data_type(id)
 );
 
-CREATE TABLE entity_field_input_type (
-	id serial PRIMARY KEY,
-	name TEXT
-);
-
-CREATE TABLE entity_field_data_type (
-	id serial PRIMARY KEY,
-	entity_field_input_type_id INTEGER,
-	FOREIGN KEY (entity_field_input_type_id) REFERENCES entity_field_input_type(id),
-	name TEXT
-);
-
-CREATE TABLE entity_field_style (
-	table_weight INTEGER,
-	weight_form INTEGER
-);

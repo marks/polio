@@ -315,8 +315,15 @@ class BadData(models.Model):
     class Meta:
         db_table = 'bad_data'
 
+'''
 class EntityType(models.Model):
-    pass
+    
+    slug = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    default_sort_direction = models.NullBooleanField()
+
+    class Meta:
+        db_table = 'entity_type'
 
 class EntityField(models.Model):
     pass
@@ -335,3 +342,4 @@ class EntityFieldDataType(models.Model):
 
 class EntityFieldStyle(models.Model):
     pass
+'''
