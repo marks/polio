@@ -32,6 +32,7 @@ urlpatterns = patterns('',
     ## CUSTOM API ##
     url(r'^api/v1/campaign/$', views.api_campaign, name='campaign'),
     url(r'^api/v1/region/$', views.api_region, name='region'),
+    url(r'^api/v1/entity/(.*)/metadata/$', views.api_entity, name='entity'),
     # http://localhost:8000/api/v1/campaign_from_vw/?region__in=12907
 
     ## TASTYPIE API ##

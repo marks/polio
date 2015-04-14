@@ -509,6 +509,10 @@ def parse_url_args(request,keys):
 
     return request_meta
 
+def api_entity(request, category_name):
+    return HttpResponse(json.dumps({'test': category_name})\
+                    , content_type="application/json")
+
 def api_campaign(request):
 
     meta_keys = ['id','region__in','start_date','limit','offset']
