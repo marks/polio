@@ -314,3 +314,24 @@ class BadData(models.Model):
 
     class Meta:
         db_table = 'bad_data'
+
+class EntityType(models.Model):
+    pass
+
+class EntityField(models.Model):
+    pass
+
+class EntityAllowedValuesTable(models.Model):
+    pass
+
+class EntityAllowedValuesColumn(models.Model):
+    pass
+
+class EntityFieldInputType(models.Model):
+    pass
+
+class EntityFieldDataType(models.Model):
+    pass
+
+class EntityFieldStyle(models.Model):
+    pass
