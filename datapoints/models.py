@@ -444,5 +444,3 @@ class EntityFieldDynamicConstraintMapping(models.Model):
     class Meta:
         db_table = 'entity_field_dynamic_constraint_mapping'
 
-
-
