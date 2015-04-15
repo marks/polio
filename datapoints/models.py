@@ -334,6 +334,18 @@ class EntityFieldStyle(models.Model):
     class Meta:
         db_table = 'entity_field_style'
 
+class EntityAllowedValuesTable(models.Model):
+    name = models.CharField()
+
+    class Meta:
+        db_table = 'entity_allowed_values_table'
+
+class EntityAllowedValuesColumn(models.Model):
+    name = models.CharField()
+
+    class Meta:
+        db_table = 'entity_allowed_values_column'
+
 class EntityFieldBasicAttributes(models.Model):
 
     field_style = models.ForeignKey(EntityFieldStyle)
@@ -363,30 +375,18 @@ class EntityTypeAttributes(models.Model):
     class Meta:
         db_table = 'content_type_attributes'
 
-class EntityAllowedValuesTable(models.Model):
-    name = models.CharField()
-
-    class Meta:
-        db_table = 'entity_allowed_values_table'
-
-class EntityAllowedValuesColumn(models.Model):
-    name = models.CharField()
-
-    class Meta:
-        db_table = 'entity_allowed_values_column'
-
 class EntityFieldInputType(models.Model):
     name = models.CharField()
 
     class Meta:
-        db_name = 'entity_field_input_type'
+        db_table = 'entity_field_input_type'
 
 class EntityFieldDataType(models.Model):
     name = models.CharField()
     input_type = models.ForeignKey(EntityFieldInputType)
 
     class Meta:
-        db_name = 'entity_field_data_type'
+        db_table = 'entity_field_data_type'
 
 class EntityField(models.Model):
     
@@ -430,7 +430,7 @@ class EntityFieldDynamicConstraint(models.Model):
     ''' ex: min_date, int_min, within_geo_area, etc. '''
     name = models.CharField()
     constraint_type = models.ForeignKey(EntityFieldAttributeType)
-    constraint_relation = models.ForeignKey(EntityFieldConstraintRelation)
+    constraint_relation = models.ForeignKey(EntityFieldDynamicConstraintRelation)
     constraint_value_as_string_format = models.CharField()
 
     class Meta:
