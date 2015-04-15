@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from django.contrib.contenttypes.models import ContentType
 from autoslug import AutoSlugField
 from simple_history.models import HistoricalRecords
 from jsonfield import JSONField
@@ -315,31 +316,127 @@ class BadData(models.Model):
     class Meta:
         db_table = 'bad_data'
 
-'''
 class EntityType(models.Model):
     
-    slug = models.CharField(max_length=255)
     name = models.CharField(max_length=255)
+    title = models.CharField(max_length=255)
     default_sort_direction = models.NullBooleanField()
+    content_type = models.ForeignKey(ContentType)
 
     class Meta:
         db_table = 'entity_type'
+        ordering = (name,)
 
 class EntityField(models.Model):
-    pass
+    
+    name = models.CharField(max_length=255)
+    ref = models.ForeignKey(ContentType.model)
+    entity_type = models.ForeignKey(EntityType)
+    description = models.CharField(max_length=1000)
+    basic_attributes = models.ForeignKey(EntityFieldBasicAttributes)
+    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
+
+    class Meta:
+        db_table = 'entity_field'
+        ordering = (name)
+
+class EntityFieldBasicAttributes(models.Model):
+
+    field = models.ForeignKey(EntityField)
+    field_style = models.ForeignKey(EntityFieldStyle)
+    allowed_values_table = models.ForeignKey(EntityAllowedValuesTable)
+    allowed_values_column = models.ForeignKey(EntityAllowedValuesColumn)
+
+    class Meta:
+        db_table = 'entity_field_attributes'
+
+class EntityFieldBasicConstraints(models.Model):
+    pattern = models.CharField()
+    required = models.BooleanField()
+    unique = models.BooleanField()
+
+    class Meta:
+        db_table = 'entity_field_basic_constraint'
+
+class EntityFieldDynamicAttribute(models.Model):
+    ''' ex: sortable, searchable, filterable, editable, on_table '''
+    name = models.CharField()
+    is_default_sort = models.BooleanField()
+    attribute_type = models.ForeignKey(EntityFieldAttributeType)
+    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
+
+    class Meta:
+        db_table = 'entity_field_dynamic_attribute'
+
+class EntityFieldDynamicAttributeMapping(models.Model):
+    dynamic_attribute = models.ForeignKey(EntityFieldDynamicAttribute)
+    field = models.ForeignKey(EntityField)
+
+    class Meta:
+        db_table = 'entity_field_dynamic_attribute_mapping'
+
+class EntityFieldDynamicConstraint(models.Model):
+    ''' ex: min_date, int_min, within_geo_area, etc. '''
+    name = models.CharField()
+    constraint_type = models.ForeignKey(EntityFieldAttributeType)
+    constraint_relation = models.ForeignKey(EntityFieldConstraintRelation)
+    constraint_value_as_string_format = models.CharField()
+
+class EntityFieldDynamicConstraintRelation(models.Model):
+    ''' ex: lt, gt, eq '''
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+
+    class Meta:
+        db_table = 'entity_field_constraint_relation'
+
+class EntityFieldDynamicConstraintMapping(models.Model):
+    dynamic_constraint = models.ForeignKey(EntityFieldDynamicConstraint)
+    field = models.ForeignKey(EntityField)
+
+    class Meta:
+        db_table = 'entity_field_dynamic_constraint_mapping'
+
+class EntityFieldAttributeType(models.Model):
+    string = models.CharField()
+
+    class Meta:
+        db_table = 'entity_field_attribute_type'
+
+class EntityTypeAttributes(models.Model):
+    default_sort_direction = models.IntegerField(default=1)
+
+    class Meta:
+        db_table = 'content_type_attributes'
 
 class EntityAllowedValuesTable(models.Model):
-    pass
+    name = models.CharField()
+
+    class Meta:
+        db_table = 'entity_allowed_values_table'
 
 class EntityAllowedValuesColumn(models.Model):
-    pass
+    name = models.CharField()
+
+    class Meta:
+        db_table = 'entity_allowed_values_column'
 
 class EntityFieldInputType(models.Model):
-    pass
+    name = models.CharField()
+
+    class Meta:
+        db_name = 'entity_field_input_type'
 
 class EntityFieldDataType(models.Model):
-    pass
+    name = models.CharField()
+    input_type = models.ForeignKey(EntityFieldInputType)
+
+    class Meta:
+        db_name = 'entity_field_data_type'
 
 class EntityFieldStyle(models.Model):
-    pass
-'''
+    table_weight = models.IntegerField(default=2)
+    weight_form = models.IntegerField(default=2)
+
+    class Meta:
+        db_name = 'entity_field_style'
