@@ -431,7 +431,7 @@ class EntityFieldDynamicConstraint(models.Model):
     name = models.CharField(max_length=255)
     constraint_type = models.ForeignKey(EntityFieldAttributeType)
     constraint_relation = models.ForeignKey(EntityFieldDynamicConstraintRelation)
-    constraint_value_as_string_format = models.CharField()
+    constraint_value_as_string_format = models.CharField(max_length=255)
 
     class Meta:
         db_table = 'entity_field_dynamic_constraint'
