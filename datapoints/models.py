@@ -325,24 +325,10 @@ class EntityType(models.Model):
 
     class Meta:
         db_table = 'entity_type'
-        ordering = (name,)
-
-class EntityField(models.Model):
-    
-    name = models.CharField(max_length=255)
-    ref = models.ForeignKey(ContentType.model)
-    entity_type = models.ForeignKey(EntityType)
-    description = models.CharField(max_length=1000)
-    basic_attributes = models.ForeignKey(EntityFieldBasicAttributes)
-    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
-
-    class Meta:
-        db_table = 'entity_field'
-        ordering = (name)
+        ordering = ('name',)
 
 class EntityFieldBasicAttributes(models.Model):
 
-    field = models.ForeignKey(EntityField)
     field_style = models.ForeignKey(EntityFieldStyle)
     allowed_values_table = models.ForeignKey(EntityAllowedValuesTable)
     allowed_values_column = models.ForeignKey(EntityAllowedValuesColumn)
@@ -358,44 +344,12 @@ class EntityFieldBasicConstraints(models.Model):
     class Meta:
         db_table = 'entity_field_basic_constraint'
 
-class EntityFieldDynamicAttribute(models.Model):
-    ''' ex: sortable, searchable, filterable, editable, on_table '''
-    name = models.CharField()
-    is_default_sort = models.BooleanField()
-    attribute_type = models.ForeignKey(EntityFieldAttributeType)
-    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
+class EntityFieldStyle(models.Model):
+    table_weight = models.IntegerField(default=2)
+    weight_form = models.IntegerField(default=2)
 
     class Meta:
-        db_table = 'entity_field_dynamic_attribute'
-
-class EntityFieldDynamicAttributeMapping(models.Model):
-    dynamic_attribute = models.ForeignKey(EntityFieldDynamicAttribute)
-    field = models.ForeignKey(EntityField)
-
-    class Meta:
-        db_table = 'entity_field_dynamic_attribute_mapping'
-
-class EntityFieldDynamicConstraint(models.Model):
-    ''' ex: min_date, int_min, within_geo_area, etc. '''
-    name = models.CharField()
-    constraint_type = models.ForeignKey(EntityFieldAttributeType)
-    constraint_relation = models.ForeignKey(EntityFieldConstraintRelation)
-    constraint_value_as_string_format = models.CharField()
-
-class EntityFieldDynamicConstraintRelation(models.Model):
-    ''' ex: lt, gt, eq '''
-    name = models.CharField(max_length=255)
-    description = models.CharField(max_length=1000)
-
-    class Meta:
-        db_table = 'entity_field_constraint_relation'
-
-class EntityFieldDynamicConstraintMapping(models.Model):
-    dynamic_constraint = models.ForeignKey(EntityFieldDynamicConstraint)
-    field = models.ForeignKey(EntityField)
-
-    class Meta:
-        db_table = 'entity_field_dynamic_constraint_mapping'
+        db_name = 'entity_field_style'
 
 class EntityFieldAttributeType(models.Model):
     string = models.CharField()
@@ -434,9 +388,61 @@ class EntityFieldDataType(models.Model):
     class Meta:
         db_name = 'entity_field_data_type'
 
-class EntityFieldStyle(models.Model):
-    table_weight = models.IntegerField(default=2)
-    weight_form = models.IntegerField(default=2)
+class EntityField(models.Model):
+    
+    name = models.CharField(max_length=255)
+    ref = models.ForeignKey(ContentType)
+    entity_type = models.ForeignKey(EntityType)
+    description = models.CharField(max_length=1000)
+    basic_attributes = models.ForeignKey(EntityFieldBasicAttributes)
+    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
 
     class Meta:
-        db_name = 'entity_field_style'
+        db_table = 'entity_field'
+        ordering = ('name',)
+
+class EntityFieldDynamicAttribute(models.Model):
+    ''' ex: sortable, searchable, filterable, editable, on_table '''
+    name = models.CharField()
+    is_default_sort = models.BooleanField()
+    attribute_type = models.ForeignKey(EntityFieldAttributeType)
+    basic_constraints = models.ForeignKey(EntityFieldBasicConstraints)
+
+    class Meta:
+        db_table = 'entity_field_dynamic_attribute'
+
+class EntityFieldDynamicAttributeMapping(models.Model):
+    dynamic_attribute = models.ForeignKey(EntityFieldDynamicAttribute)
+    field = models.ForeignKey(EntityField)
+
+    class Meta:
+        db_table = 'entity_field_dynamic_attribute_mapping'
+
+class EntityFieldDynamicConstraintRelation(models.Model):
+    ''' ex: lt, gt, eq '''
+    name = models.CharField(max_length=255)
+    description = models.CharField(max_length=1000)
+
+    class Meta:
+        db_table = 'entity_field_constraint_relation'
+
+class EntityFieldDynamicConstraint(models.Model):
+    ''' ex: min_date, int_min, within_geo_area, etc. '''
+    name = models.CharField()
+    constraint_type = models.ForeignKey(EntityFieldAttributeType)
+    constraint_relation = models.ForeignKey(EntityFieldConstraintRelation)
+    constraint_value_as_string_format = models.CharField()
+
+    class Meta:
+        db_table = 'entity_field_dynamic_constraint'
+
+class EntityFieldDynamicConstraintMapping(models.Model):
+    dynamic_constraint = models.ForeignKey(EntityFieldDynamicConstraint)
+    field = models.ForeignKey(EntityField)
+    value_as_string = models.CharField()
+
+    class Meta:
+        db_table = 'entity_field_dynamic_constraint_mapping'
+
+
+
