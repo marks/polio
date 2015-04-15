@@ -327,6 +327,13 @@ class EntityType(models.Model):
         db_table = 'entity_type'
         ordering = ('name',)
 
+class EntityFieldStyle(models.Model):
+    table_weight = models.IntegerField(default=2)
+    weight_form = models.IntegerField(default=2)
+
+    class Meta:
+        db_name = 'entity_field_style'
+
 class EntityFieldBasicAttributes(models.Model):
 
     field_style = models.ForeignKey(EntityFieldStyle)
@@ -343,13 +350,6 @@ class EntityFieldBasicConstraints(models.Model):
 
     class Meta:
         db_table = 'entity_field_basic_constraint'
-
-class EntityFieldStyle(models.Model):
-    table_weight = models.IntegerField(default=2)
-    weight_form = models.IntegerField(default=2)
-
-    class Meta:
-        db_name = 'entity_field_style'
 
 class EntityFieldAttributeType(models.Model):
     string = models.CharField()
