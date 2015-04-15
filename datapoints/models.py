@@ -332,7 +332,7 @@ class EntityFieldStyle(models.Model):
     weight_form = models.IntegerField(default=2)
 
     class Meta:
-        db_name = 'entity_field_style'
+        db_table = 'entity_field_style'
 
 class EntityFieldBasicAttributes(models.Model):
 
