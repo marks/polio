@@ -59,4 +59,18 @@ CREATE TABLE entity_allowed_values_column (
 	entity_field_data_type_id INTEGER,
 	FOREIGN KEY (entity_field_data_type_id) REFERENCES entity_field_data_type(id)
 );
+# django content type
+# look at json spec foreign keys
+/* put this in view
+ calc_curs = AggDataPoint.objects\
+            .raw("SELECT * FROM fn_calc_datapoint(%s)",[self.cache_job.id]) # fc_calc_datapoint proc
 
+        calc_dp_ids = [x.id for x in calc_curs] # because of lazy querysets
+*/
+
+# create the models.py file with no syncdb
+	# use all imports etc be able to import in shell
+# generate one big migration maybe 3-4
+# use django unit test testcases for the models
+
+# go further with the view taking info from urls and returning it 
