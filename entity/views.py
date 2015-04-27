@@ -18,6 +18,7 @@ MAX_LIMIT = 500
 
 USER_METADATA = 'static/users_metadata_mockup.json'
 
+
 class MyUser:
     def __init__(self, pk):
         __auth_user = User.objects.get(pk=pk)
@@ -26,10 +27,10 @@ class MyUser:
         self.last_name = __auth_user.last_name
         __groups_raw = Group.objects.raw('''
             SELECT ag.id, ag.name
-                FROM auth_user au 
+                FROM auth_user au
                     JOIN auth_user_groups aug
-                        ON au.id = aug.user_id 
-                    JOIN auth_group ag 
+                        ON au.id = aug.user_id
+                    JOIN auth_group ag
                         ON ag.id = aug.group_id
                 WHERE au.id = %s;
             ''', (pk,))

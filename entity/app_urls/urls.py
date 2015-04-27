@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.conf.urls import url, include
 from entity import views
 
 urlpatterns = [
@@ -8,9 +8,11 @@ urlpatterns = [
         ################
 
     ## (JSON FIXTURE) USER METADATA ##
-    url(r'^users/metadata/$', views.api_user_mock,name='user_metadata'),
+    url(r'^users/metadata/$', views.api_user_mock, name='user_metadata'),
 
     ## USERS API ##
     url(r'^users/$', views.api_user, name='user'),
+
+    url(r'^users/create/$', include(dev_api.urls)),
 
 ]
