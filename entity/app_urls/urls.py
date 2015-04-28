@@ -13,6 +13,4 @@ urlpatterns = [
     ## USERS API ##
     url(r'^users/$', views.api_user, name='user'),
 
-    url(r'^users/create/$', include(dev_api.urls)),
-
 ]
