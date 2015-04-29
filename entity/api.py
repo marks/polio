@@ -19,6 +19,8 @@ from tastypie.authentication import SessionAuthentication
 #from tastypie.authorization import DjangoAuthorization
 from tastypie.authorization import Authorization
 from tastypie.authentication import Authentication
+from tastypie.exceptions import ImmediateHttpResponse
+from tastypie.http import HttpBadRequest, HttpAccepted
 
 import re
 import json
@@ -48,16 +50,12 @@ def validate_password(password):
         return True
     return False
 '''
-class UserApiException(TastypieError):
+
+class UserApiBadRequest(ImmediateHttpResponse):
     def __init__(self, message="", field=""):
-        self._response = {
-            "error": message,
-            "error_fields": [ field ]
-        }
-    @property
-    def response(self):
-        return HttpResponse(json.dumps(self._response),
-                content_type='application/json')
+        ImmediateHttpResponse.__init__(self, HttpBadRequest(content=json.dumps({
+            'error': message, 'error_fields': [field]}),
+            content_type="application/json; charset=utf-8"))
 
 class UserResource(ModelResource):
     class Meta:
@@ -89,37 +87,27 @@ class CreateUserResource(ModelResource):
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
-                raise UserApiException(field=field, message="Missing Parameter")
+                raise UserApiBadRequest(field=field, message="Missing Parameter")
         return bundle
 
     def obj_create(self, bundle, **kwargs):
         print 'obj create called'
-        try:
-            email = bundle.data['user']['email']
-            first_name = bundle.data['user']['first_name']
-            last_name = bundle.data['user']['last_name']
-            username = bundle.data['user']['username']
-            ########
-            '''
-            username = bundle.data.get('username')
-            email = bundle.data.get('email')
-            first_name = bundle.data.get('first_name')
-            last_name = bundle.data.get('last_name')
-            '''
-            ########
-        except KeyError as missing_key:
-            print 'key error'
-            print missing_key
-            raise UserApiException(field=missing_key,
-                message="Missing Parameter")
+        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
+        for field in REQUIRED_FIELDS:
+            if field not in bundle.data['user']:
+                raise UserApiBadRequest(field=field, message="Missing Parameter")
+        email = bundle.data['user']['email']
+        first_name = bundle.data['user']['first_name']
+        last_name = bundle.data['user']['last_name']
+        username = bundle.data['user']['username']
         try:
             if User.objects.filter(email=email):
                 print 'email already there'
-                raise UserApiException(field="email",
+                raise UserApiBadRequest(field="email",
                     message="A user with that email is already enrolled")
             if User.objects.filter(username=username):
                 print 'username already there'
-                raise UserApiException(field="username",
+                raise UserApiBadRequest(field="username",
                     message="A user with that username is already enrolled")
         except User.DoesNotExist:
             pass
