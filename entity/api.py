@@ -53,12 +53,14 @@ def validate_password(password):
 '''
 
 class UserApiBadRequest(ImmediateHttpResponse):
+
     def __init__(self, message="", field=""):
         ImmediateHttpResponse.__init__(self, HttpBadRequest(content=json.dumps({
             'error': message, 'error_fields': [field]}),
             content_type="application/json; charset=utf-8"))
 
 class UserResource(ModelResource):
+
     class Meta:
         queryset = User.objects.all()
         resource_name = 'auth/user'
@@ -68,8 +70,7 @@ class UserResource(ModelResource):
         authentication = Authentication()
 
 class CreateUserResource(ModelResource):
-    #user = fields.ForeignKey(UserResource, 'user', full=True)
-    #groups = fields.ToManyField(GroupResource, full=True)
+
 
     class Meta:
         allowed_methods = ['post']
@@ -81,11 +82,10 @@ class CreateUserResource(ModelResource):
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
-        #object_class = User
 
 
     def hydrate(self, bundle):
-        print 'hydrate called'
+
         #TODO: add groups
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
@@ -96,7 +96,7 @@ class CreateUserResource(ModelResource):
     #TODO: dehydrate
 
     def obj_create(self, bundle, **kwargs):
-        print 'obj create called'
+
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
@@ -126,5 +126,5 @@ class CreateUserResource(ModelResource):
 
             raise UserApiBadRequest(message='Username already taken.',
                 field='username')
-                
+
         return bundle
