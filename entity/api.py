@@ -59,17 +59,17 @@ class UserApiException(TastypieError):
         return HttpResponse(json.dumps(self._response),
                 content_type='application/json')
 
-'''
 class UserResource(ModelResource):
     class Meta:
         queryset = User.objects.all()
         resource_name = 'auth/user'
         excludes = ['password']
         always_return_data = True
-'''
+        authorization = Authorization()
+        authentication = Authentication()
 
 class CreateUserResource(ModelResource):
-    user = fields.ForeignKey('core.api.UserResource', 'user', full=True)
+    user = fields.ForeignKey(UserResource, 'user', full=True)
     #groups = fields.ToManyField(GroupResource, full=True)
 
     class Meta:
