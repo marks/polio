@@ -8,6 +8,7 @@ from django.core import serializers
 from django.views import generic
 from django.contrib.auth.models import User,Group
 from django.template import RequestContext
+from django.db import IntegrityError
 
 from django.utils.translation import ugettext as _
 from django.db import models
@@ -112,4 +113,12 @@ class CreateUserResource(ModelResource):
         except User.DoesNotExist:
             pass
         #self._meta.resource_name = UserProfileResource._meta.resource_name
-        return super(CreateUserResource, self).obj_create(bundle, **kwargs)
+        try:
+            bundle = super(CreateUserResource, self).obj_create(bundle, **kwargs)
+        except IntegrityError:
+            raise
+            '''
+            raise UserApiBadRequest(message='Username already taken.',
+                field='username')
+            '''
+        return bundle
