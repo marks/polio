@@ -15,13 +15,16 @@ from tastypie.models import create_api_key
 from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.authentication import Authentication
-from tastypie.authorization import Authorization
+from tastypie.authentication import SessionAuthentication
+from tastypie.authorization import DjangoAuthorization
 
 import re
 import json
 
 models.signals.post_save.connect(create_api_key, sender=User)
+
+TASTYPIE_FULL_DEBUG = True
+
 
 '''
 MINIMUM_PASSWORD_LENGTH = 6
@@ -43,7 +46,6 @@ def validate_password(password):
         return True
     return False
 '''
-
 class UserApiException(TastypieError):
     def __init__(self, message="", field=""):
         self._response = {
@@ -55,25 +57,34 @@ class UserApiException(TastypieError):
         return HttpResponse(json.dumps(self._response),
                 content_type='application/json')
 
+'''
+class UserResource(ModelResource):
+    class Meta:
+        queryset = User.objects.all()
+        resource_name = 'auth/user'
+        excludes = ['password']
+        always_return_data = True
+        '''
+
 class CreateUserResource(ModelResource):
-    user = fields.ForeignKey('core.api.UserResource', 'user', full=True)
+    user = fields.ForeignKey('entity.api.UserResource', 'user', full=True)
     #groups = fields.ToManyField(GroupResource, full=True)
 
     class Meta:
         allowed_methods = ['post']
-        always_return_data = True
-        authentication = Authentication() #TODO
-        authorization = Authorization()   #TODO
+        always_return_data = True #change this?
+        authentication = SessionAuthentication() #TODO
+        authorization = DjangoAuthorization()   #TODO
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
 
     def hydrate(self, bundle):
         print 'hydrate called'
-        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
-            "groups")
+        #TODO: add groups
+        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
-            if field not in bundle.data["user"]:
+            if field not in bundle.data['user']:
                 raise UserApiException(field=field, message="Missing Parameter")
         return bundle
 
@@ -84,17 +95,29 @@ class CreateUserResource(ModelResource):
             first_name = bundle.data['user']['first_name']
             last_name = bundle.data['user']['last_name']
             username = bundle.data['user']['username']
+            ########
+            '''
+            username = bundle.data.get('username')
+            email = bundle.data.get('email')
+            first_name = bundle.data.get('first_name')
+            last_name = bundle.data.get('last_name')
+            '''
+            ########
         except KeyError as missing_key:
+            print 'key error'
+            print missing_key
             raise UserApiException(field=missing_key,
                 message="Missing Parameter")
         try:
             if User.objects.filter(email=email):
+                print 'email already there'
                 raise UserApiException(field="email",
                     message="A user with that email is already enrolled")
             if User.objects.filter(username=username):
+                print 'username already there'
                 raise UserApiException(field="username",
                     message="A user with that username is already enrolled")
         except User.DoesNotExist:
             pass
         #self._meta.resource_name = UserProfileResource._meta.resource_name
-        #return super(CreateUserResource, self).obj_create(bundle, **kwargs)
+        return super(CreateUserResource, self).obj_create(bundle, **kwargs)
