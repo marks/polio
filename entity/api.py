@@ -56,7 +56,7 @@ class UserApiBadRequest(ImmediateHttpResponse):
 
     def __init__(self, message="", field=""):
         ImmediateHttpResponse.__init__(self, HttpBadRequest(content=json.dumps({
-            'error': message, 'error_fields': [field]}),
+            'error': message, 'error_fields': [field], 'success': False}),
             content_type="application/json; charset=utf-8"))
 
 class UserResource(ModelResource):
@@ -93,7 +93,24 @@ class CreateUserResource(ModelResource):
                 raise UserApiBadRequest(field=field, message="Missing Parameter")
         return bundle
 
-    #TODO: dehydrate
+    def dehydrate(self, bundle):
+
+
+        pk = User.objects.get(username=bundle.obj.username).pk
+        bundle.data = {
+            'error': None,
+            'success': True,
+            'error_fields': None,
+            'user': {
+                'id': pk,
+                'email': bundle.obj.email,
+                'username': bundle.obj.username,
+                'first_name': bundle.obj.first_name,
+                'last_name': bundle.obj.last_name
+            }
+        }
+
+        return bundle
 
     def obj_create(self, bundle, **kwargs):
 
