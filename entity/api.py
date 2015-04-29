@@ -16,7 +16,9 @@ from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication
-from tastypie.authorization import DjangoAuthorization
+#from tastypie.authorization import DjangoAuthorization
+from tastypie.authorization import Authorization
+from tastypie.authentication import Authentication
 
 import re
 import json
@@ -64,17 +66,19 @@ class UserResource(ModelResource):
         resource_name = 'auth/user'
         excludes = ['password']
         always_return_data = True
-        '''
+'''
 
 class CreateUserResource(ModelResource):
-    user = fields.ForeignKey('entity.api.UserResource', 'user', full=True)
+    user = fields.ForeignKey('core.api.UserResource', 'user', full=True)
     #groups = fields.ToManyField(GroupResource, full=True)
 
     class Meta:
         allowed_methods = ['post']
         always_return_data = True #change this?
-        authentication = SessionAuthentication() #TODO
-        authorization = DjangoAuthorization()   #TODO
+        #authentication = SessionAuthentication()
+        authentication = Authentication()
+        #authorization = DjangoAuthorization()   #TODO
+        authorization = Authorization()
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
