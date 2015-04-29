@@ -68,7 +68,7 @@ class UserResource(ModelResource):
         authentication = Authentication()
 
 class CreateUserResource(ModelResource):
-    user = fields.ForeignKey(UserResource, 'user', full=True)
+    #user = fields.ForeignKey(UserResource, 'user', full=True)
     #groups = fields.ToManyField(GroupResource, full=True)
 
     class Meta:
@@ -93,6 +93,8 @@ class CreateUserResource(ModelResource):
                 raise UserApiBadRequest(field=field, message="Missing Parameter")
         return bundle
 
+    #TODO: dehydrate
+
     def obj_create(self, bundle, **kwargs):
         print 'obj create called'
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
@@ -116,7 +118,12 @@ class CreateUserResource(ModelResource):
             pass
         #self._meta.resource_name = UserProfileResource._meta.resource_name
         try:
+            '''
             bundle = super(CreateUserResource, self).obj_create(bundle, **kwargs)
+            '''
+            bundle.obj = User.objects.create_user(username, first_name=first_name,
+                last_name=last_name, email=email, password='xxx')
+
         except IntegrityError:
             raise
             '''
