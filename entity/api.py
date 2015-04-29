@@ -81,6 +81,8 @@ class CreateUserResource(ModelResource):
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
+        #object_class = User
+
 
     def hydrate(self, bundle):
         print 'hydrate called'
