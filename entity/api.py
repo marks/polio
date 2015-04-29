@@ -116,18 +116,15 @@ class CreateUserResource(ModelResource):
                     message="A user with that username is already enrolled")
         except User.DoesNotExist:
             pass
-        #self._meta.resource_name = UserProfileResource._meta.resource_name
+
         try:
-            '''
-            bundle = super(CreateUserResource, self).obj_create(bundle, **kwargs)
-            '''
+
             bundle.obj = User.objects.create_user(username, first_name=first_name,
                 last_name=last_name, email=email, password='xxx')
 
         except IntegrityError:
-            raise
-            '''
+
             raise UserApiBadRequest(message='Username already taken.',
                 field='username')
-            '''
+                
         return bundle
