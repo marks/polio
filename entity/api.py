@@ -18,8 +18,6 @@ from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication
 from tastypie.authorization import DjangoAuthorization
-#from tastypie.authorization import Authorization
-#from tastypie.authentication import Authentication
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
@@ -44,7 +42,7 @@ REGEX_VALID_PASSWORD = (
     '{' + str(MINIMUM_PASSWORD_LENGTH) + ',}$')
 
 def valid_password(password):
-    
+
     if re.match(REGEX_VALID_PASSWORD, password):
         return True
     return False
@@ -81,11 +79,9 @@ class CreateUserResource(ModelResource):
 
     class Meta:
         allowed_methods = ['post']
-        always_return_data = True #change this?
+        always_return_data = True
         authentication = SessionAuthentication()
-        #authentication = Authentication()
-        authorization = DjangoAuthorization()   #TODO
-        #authorization = Authorization()
+        authorization = DjangoAuthorization()
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
