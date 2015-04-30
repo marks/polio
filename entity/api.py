@@ -16,8 +16,8 @@ from tastypie.models import create_api_key
 from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.authentication import Authentication as SessionAuthentication
-from tastypie.authorization import Authorization as DjangoAuthorization
+from tastypie.authentication import SessionAuthentication
+from tastypie.authorization import DjangoAuthorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
@@ -73,6 +73,9 @@ class UserResource(ModelResource):
         always_return_data = True
         authorization = DjangoAuthorization()
         authentication = SessionAuthentication()
+
+class ResetPasswordResource(ModelResource):
+    pass
 
 class CreateUserResource(ModelResource):
 
@@ -161,7 +164,7 @@ class CreateUserResource(ModelResource):
                     group = Group.objects.get(name=group_name)
                 except:
                     raise UserApiBadRequest(field='groups',
-                        message='Invalid Group name given')
+                        message='Invalid Group name: '+group_name)
                 try:
                     group.user_set.add(user)
                     pass
