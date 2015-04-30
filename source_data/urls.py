@@ -7,20 +7,7 @@ urlpatterns = [
     url(r'^map_header/(?P<document_id>[0-9]+)/',map_header\
         , name='map_header'),
 
-    url(r'^map_indicator/(?P<pk>[0-9]+)/$', IndicatorMapCreateView.as_view()\
-        ,name='map_indicator'),
-
-    url(r'^map_region/(?P<pk>[0-9]+)/$', RegionMapCreateView.as_view()\
-        ,name='map_region'),
-
-    url(r'^map_campaign/(?P<pk>[0-9]+)/$', CampaignMapCreateView.as_view(),\
-        name='map_campaign'),
-
-    url(r'^un_map/(?P<source_object_id>[0-9]+)/(?P<db_model>\w+)/(?P<document_id>[0-9]+)/$',un_map,name='un_map'),
-
     url(r'^refresh_master/$', refresh_master,name='refresh_master'),
-
-    url(r'^source_indicator/(?P<pk>[0-9]+)/$', ShowSourceIndicator.as_view()),
 
     url(r'^mark_doc_as_processed/(?P<document_id>[0-9]+)/$'\
         , mark_doc_as_processed, name='mark_doc_as_processed'),
@@ -36,7 +23,7 @@ urlpatterns = [
         name='document_review'),
 
     url(r'^sync_source_datapoints/(?P<document_id>[0-9]+)/\
-        (?P<master_indicator_id>[0-9]+)/$',sync_source_datapoints,\
+        (?P<master_id>[0-9]+)/$',sync_source_datapoints,\
         name='sync_source_datapoints'),
 
     url(r'^refresh_master_no_indicator/(?P<document_id>[0-9]+)/',refresh_master_no_indicator,\
