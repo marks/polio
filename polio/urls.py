@@ -59,6 +59,11 @@ urlpatterns = patterns('',
     ## Entity API ##
     url(r'api/v1/entity/', decorator_include(login_required, 'entity.app_urls.urls', namespace='entity')),
 
+    url(r'^resetpassword/$',  'django.contrib.auth.views.password_reset',  {'post_reset_redirect' : 'passwordsent/'}, name='password_reset'),
+    url(r'^resetpassword/passwordsent/',  'django.contrib.auth.views.password_reset_done', name='password_reset_done'),
+    url(r'^reset/(?P<uidb64>[0-9A-Za-z]+)-(?P<token>.+)/$',  'django.contrib.auth.views.password_reset_confirm', {'post_reset_redirect' : '/reset/done/'}, name='password_reset_confirm'),
+    url(r'^reset/done/$', 'django.contrib.auth.views.password_reset_complete', name='password_reset_complete'),
+
     ##
     url(r'^$', RedirectView.as_view(url='/datapoints', permanent=False), name='index'),
     ##
