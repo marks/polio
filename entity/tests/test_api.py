@@ -14,6 +14,7 @@ class CreateUserTestCase(ResourceTestCase):
     fixtures = ['test_data.json',]
 
     def setUp(self):
+
         super(CreateUserTestCase, self).setUp()
 
         self.username = 'bfontecc_test'
@@ -33,15 +34,18 @@ class CreateUserTestCase(ResourceTestCase):
                 'first_name': 'Bret',
                 'last_name': 'Fontecchio',
                 'email': self._username+'@seedscientific.com',
-                'password': 'Unicef2015!@$'
+                'password': 'Unicef2015!@$',
+                'groups': ['unicef_hq']
             }
         }
 
     def setup_session(self):
+
         self.api_client.client.login(username=self.username,
             password=self.password)
 
     def test_get_detail_json(self):
+
         pass
         # this tests the get
         # it needs to be changed
@@ -56,18 +60,22 @@ class CreateUserTestCase(ResourceTestCase):
         data = self.deserialize(resp)['objects'][0]
         self.assertEqual(data.get('username'), )
         '''
+
     def test_user_post_unauthenticated(self):
+
         self.assertHttpUnauthorized(self.api_client.post(self.post_url,
             format='json', data=self.post_data))
 
     def test_user_post_badpassword(self):
+
         bad_data = {
             'user': {
                 'username': self._username,
                 'first_name': 'Bret',
                 'last_name': 'Fontecchio',
                 'email': self._username+'@seedscientific.com',
-                'password': 'password'
+                'password': 'password',
+                'groups': 'unicef_hq'
             }
         }
         self.setup_session()
@@ -77,12 +85,14 @@ class CreateUserTestCase(ResourceTestCase):
         self.assertEqual(User.objects.count(), initial_count)
 
     def test_user_post_missingfield(self):
+
         bad_data = {
             'user': {
                 'username': self._username,
                 'first_name': 'Bret',
                 'last_name': 'Fontecchio',
-                'password': 'password'
+                'password': 'password',
+                'groups': 'unicef_hq'
             }
         }
         self.setup_session()
@@ -92,6 +102,7 @@ class CreateUserTestCase(ResourceTestCase):
         self.assertEqual(User.objects.count(), initial_count)
 
     def test_user_post(self):
+
         self.setup_session()
 
         # Check how many are there first.
@@ -102,12 +113,15 @@ class CreateUserTestCase(ResourceTestCase):
         self.assertEqual(User.objects.count(), initial_count+1)
 
     def test_get_list_json(self):
+
         pass
 
     def test_get_list_xml(self):
+
         pass
 
     def test_get_detail_unauthenticated(self):
+
         '''
         self.assertHttpUnauthorized(self.api_client.get(self.get_url, format='json'))
         '''

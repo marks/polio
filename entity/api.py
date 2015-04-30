@@ -16,8 +16,8 @@ from tastypie.models import create_api_key
 from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.authentication import SessionAuthentication
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authentication import Authentication as SessionAuthentication
+from tastypie.authorization import Authorization as DjangoAuthorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
@@ -99,17 +99,27 @@ class CreateUserResource(ModelResource):
     def dehydrate(self, bundle):
 
 
-        pk = User.objects.get(username=bundle.obj.username).pk
+        user = User.objects.get(username=bundle.obj.username)
+        groups = Group.objects.raw(
+            '''
+            SELECT * FROM auth_user_groups aug
+            JOIN auth_group ag
+                ON ag.id = aug.group_id
+            WHERE aug.user_id = %s;
+            ''', [user.pk]
+        )
+        group_names = [ g.name for g in groups ]
         bundle.data = {
             'error': None,
             'success': True,
             'error_fields': None,
             'user': {
-                'id': pk,
+                'id': user.pk,
                 'email': bundle.obj.email,
                 'username': bundle.obj.username,
                 'first_name': bundle.obj.first_name,
-                'last_name': bundle.obj.last_name
+                'last_name': bundle.obj.last_name,
+                'groups': group_names
             }
         }
 
@@ -127,6 +137,7 @@ class CreateUserResource(ModelResource):
         last_name = bundle.data['user']['last_name']
         username = bundle.data['user']['username']
         password = bundle.data['user']['password']
+        groups = bundle.data['user']['groups']
         if valid_password(password) == False:
             raise UserPasswordError()
         try:
@@ -142,10 +153,22 @@ class CreateUserResource(ModelResource):
             pass
 
         try:
-
-            bundle.obj = User.objects.create_user(username, first_name=first_name,
+            # wrap with auth_filter
+            user = User.objects.create_user(username, first_name=first_name,
                 last_name=last_name, email=email, password=password)
-            #TODO: add groups
+            for group_name in groups:
+                try:
+                    group = Group.objects.get(name=group_name)
+                except:
+                    raise UserApiBadRequest(field='groups',
+                        message='Invalid Group name given')
+                try:
+                    group.user_set.add(user)
+                    pass
+                except:
+                    raise UserApiBadRequest(field='groups',
+                        message='Could not add user to group: '+group.name)
+            bundle.obj = user
 
         except IntegrityError:
 
