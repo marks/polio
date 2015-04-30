@@ -29,9 +29,6 @@ import json
 models.signals.post_save.connect(create_api_key, sender=User)
 
 TASTYPIE_FULL_DEBUG = True
-
-
-'''
 MINIMUM_PASSWORD_LENGTH = 6
 REGEX_VALID_PASSWORD = (
     ## Don't allow any spaces, e.g. '\t', '\n' or whitespace etc.
@@ -46,11 +43,12 @@ REGEX_VALID_PASSWORD = (
     ## Minimum 8 characters
     '{' + str(MINIMUM_PASSWORD_LENGTH) + ',}$')
 
-def validate_password(password):
+def valid_password(password):
+    
     if re.match(REGEX_VALID_PASSWORD, password):
         return True
     return False
-'''
+
 
 class UserApiBadRequest(ImmediateHttpResponse):
 
@@ -58,6 +56,15 @@ class UserApiBadRequest(ImmediateHttpResponse):
         ImmediateHttpResponse.__init__(self, HttpBadRequest(content=json.dumps({
             'error': message, 'error_fields': [field], 'success': False}),
             content_type="application/json; charset=utf-8"))
+
+class UserPasswordError(UserApiBadRequest):
+
+    def __init__(self):
+        UserApiBadRequest.__init__(self, message=''' Invalid Password.
+            Please Enter a password at least 8 characters long with no spaces,
+            at least one digit, at least one uppercase letter, and at least one
+            special character such as: *%$#@!?)(
+            ''', field='password')
 
 class UserResource(ModelResource):
 
@@ -114,7 +121,8 @@ class CreateUserResource(ModelResource):
 
     def obj_create(self, bundle, **kwargs):
 
-        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
+        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
+            "password")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
                 raise UserApiBadRequest(field=field, message="Missing Parameter")
@@ -122,6 +130,9 @@ class CreateUserResource(ModelResource):
         first_name = bundle.data['user']['first_name']
         last_name = bundle.data['user']['last_name']
         username = bundle.data['user']['username']
+        password = bundle.data['user']['password']
+        if valid_password(password) == False:
+            raise UserPasswordError()
         try:
             if User.objects.filter(email=email):
                 print 'email already there'
@@ -137,7 +148,7 @@ class CreateUserResource(ModelResource):
         try:
 
             bundle.obj = User.objects.create_user(username, first_name=first_name,
-                last_name=last_name, email=email, password='xxx')
+                last_name=last_name, email=email, password=password)
             #TODO: add groups
 
         except IntegrityError:

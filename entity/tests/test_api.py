@@ -26,13 +26,14 @@ class CreateUserTestCase(ResourceTestCase):
         self.get_url = "/api/v1/entity/users/"
         self.user_update = "/api/v1/entity/users/update"
         self.admin_update = "/api/v1/entity/users/admin_update" # TODO: put hash here
-        _username = 'test_user'+str(int(random.random() * 100000))
+        self._username = 'test_user'+str(int(random.random() * 100000))
         self.post_data = {
             'user': {
-                'username': _username,
+                'username': self._username,
                 'first_name': 'Bret',
                 'last_name': 'Fontecchio',
-                'email': _username+'@seedscientific.com'
+                'email': self._username+'@seedscientific.com',
+                'password': 'Unicef2015!@$'
             }
         }
 
@@ -58,6 +59,37 @@ class CreateUserTestCase(ResourceTestCase):
     def test_user_post_unauthenticated(self):
         self.assertHttpUnauthorized(self.api_client.post(self.post_url,
             format='json', data=self.post_data))
+
+    def test_user_post_badpassword(self):
+        bad_data = {
+            'user': {
+                'username': self._username,
+                'first_name': 'Bret',
+                'last_name': 'Fontecchio',
+                'email': self._username+'@seedscientific.com',
+                'password': 'password'
+            }
+        }
+        self.setup_session()
+        initial_count = User.objects.count()
+        self.assertHttpBadRequest(self.api_client.post(self.post_url,
+            format='json', data=bad_data))
+        self.assertEqual(User.objects.count(), initial_count)
+
+    def test_user_post_missingfield(self):
+        bad_data = {
+            'user': {
+                'username': self._username,
+                'first_name': 'Bret',
+                'last_name': 'Fontecchio',
+                'password': 'password'
+            }
+        }
+        self.setup_session()
+        initial_count = User.objects.count()
+        self.assertHttpBadRequest(self.api_client.post(self.post_url,
+            format='json', data=bad_data))
+        self.assertEqual(User.objects.count(), initial_count)
 
     def test_user_post(self):
         self.setup_session()
