@@ -17,9 +17,9 @@ from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
 from tastypie.authentication import SessionAuthentication
-#from tastypie.authorization import DjangoAuthorization
-from tastypie.authorization import Authorization
-from tastypie.authentication import Authentication
+from tastypie.authorization import DjangoAuthorization
+#from tastypie.authorization import Authorization
+#from tastypie.authentication import Authentication
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
@@ -66,8 +66,8 @@ class UserResource(ModelResource):
         resource_name = 'auth/user'
         excludes = ['password']
         always_return_data = True
-        authorization = Authorization()
-        authentication = Authentication()
+        authorization = DjangoAuthorization()
+        authentication = SessionAuthentication()
 
 class CreateUserResource(ModelResource):
 
@@ -75,10 +75,10 @@ class CreateUserResource(ModelResource):
     class Meta:
         allowed_methods = ['post']
         always_return_data = True #change this?
-        #authentication = SessionAuthentication()
-        authentication = Authentication()
-        #authorization = DjangoAuthorization()   #TODO
-        authorization = Authorization()
+        authentication = SessionAuthentication()
+        #authentication = Authentication()
+        authorization = DjangoAuthorization()   #TODO
+        #authorization = Authorization()
         queryset = User.objects.all()
         resource_name = 'create_user'
         always_return_data = True
@@ -138,6 +138,7 @@ class CreateUserResource(ModelResource):
 
             bundle.obj = User.objects.create_user(username, first_name=first_name,
                 last_name=last_name, email=email, password='xxx')
+            #TODO: add groups
 
         except IntegrityError:
 
