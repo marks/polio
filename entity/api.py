@@ -43,16 +43,11 @@ REGEX_VALID_PASSWORD = (
     '{' + str(MINIMUM_PASSWORD_LENGTH) + ',}$')
 
 #TODO
-ALPHA_NUM_UNDERSCORE_ONLY = ''
+ALPHA_NUM = '[A-Za-z0-9 _]{3,30}$'
 
 #TODO
-PROBABLY_AN_EMAIL = ''
+EMAIL = '.{0,75}'
 
-def valid_password(password):
-
-    if re.match(REGEX_VALID_PASSWORD, password):
-        return True
-    return False
 
 
 class UserApiBadRequest(ImmediateHttpResponse):
@@ -132,6 +127,11 @@ class UserResource(ModelResource):
 
     def obj_create(self, bundle, **kwargs):
 
+        def retrieve_valid(data, fieldname, pattern):
+            if re.match(pattern, data[fieldname]) == False:
+                raise BadFormattingException(fieldname)
+            return data[fieldname]
+
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
             "password")
 
@@ -139,15 +139,14 @@ class UserResource(ModelResource):
             if field not in bundle.data['user']:
                 raise UserApiBadRequest(field=field, message="Missing Parameter")
 
-        email = bundle.data['user']['email']
-        first_name = bundle.data['user']['first_name']
-        last_name = bundle.data['user']['last_name']
-        username = bundle.data['user']['username']
-        password = bundle.data['user']['password']
-        groups = bundle.data['user']['groups']
+        userdata = bundle.data['user']
+        email = retrieve_valid(userdata, 'email', EMAIL)
+        first_name = retrieve_valid(userdata, 'first_name', ALPHA_NUM)
+        last_name = retrieve_valid(userdata, 'last_name', ALPHA_NUM)
+        username = retrieve_valid(userdata, 'username', ALPHA_NUM)
+        password = retrieve_valid(userdata, 'email', REGEX_VALID_PASSWORD)
+        groups = userdata['groups']
 
-        if valid_password(password) == False:
-            raise UserPasswordError()
         try:
             if User.objects.filter(email=email):
                 raise UserApiBadRequest(field="email",

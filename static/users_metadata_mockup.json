@@ -36,7 +36,7 @@
 			"constraints": {
 				"required": true,
 				"unique": false,
-				"pattern": "*{0,30}"
+				"pattern": "[A-Za-z0-9 _]{3,30}$"
 			},
 			"sortable": true,
 			"searchable": true,
@@ -102,7 +102,7 @@
 			"constraints": {
 				"required": true,
                 "unique": true,
-                "pattern": "*{0,75}"
+                "pattern": ".{0,75}"
 			},
 			"sortable": true,
 			"searchable": true,
