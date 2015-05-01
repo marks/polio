@@ -58,11 +58,8 @@ class UserApiBadRequest(ImmediateHttpResponse):
 class UserPasswordError(UserApiBadRequest):
 
     def __init__(self):
-        UserApiBadRequest.__init__(self, message=''' Invalid Password.
-            Please Enter a password at least 8 characters long with no spaces,
-            at least one digit, at least one uppercase letter, and at least one
-            special character such as: *%$#@!?)(
-            ''', field='password')
+        UserApiBadRequest.__init__(self, message="Invalid Password. Please Enter a password at least 8 characters long with no spaces, at least one digit, at least one uppercase letter, and at least one special character such as: *%$#@!?)(",
+            field='password')
 
 class UserResource(ModelResource):
 
@@ -131,11 +128,9 @@ class UserResource(ModelResource):
             raise UserPasswordError()
         try:
             if User.objects.filter(email=email):
-                print 'email already there'
                 raise UserApiBadRequest(field="email",
                     message="A user with that email is already enrolled")
             if User.objects.filter(username=username):
-                print 'username already there'
                 raise UserApiBadRequest(field="username",
                     message="A user with that username is already enrolled")
         except User.DoesNotExist:
@@ -161,7 +156,7 @@ class UserResource(ModelResource):
 
         except IntegrityError:
 
-            raise UserApiBadRequest(message='Username already taken.',
+            raise UserApiBadRequest(message='A user with that username is already enrolled',
                 field='username')
 
         return bundle
