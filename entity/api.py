@@ -16,8 +16,8 @@ from tastypie.models import create_api_key
 from tastypie.exceptions import TastypieError
 from tastypie.resources import ModelResource
 from tastypie import fields
-from tastypie.authentication import SessionAuthentication
-from tastypie.authorization import DjangoAuthorization
+from tastypie.authentication import Authentication as SessionAuthentication
+from tastypie.authorization import Authorization as DjangoAuthorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
@@ -66,24 +66,14 @@ class UserPasswordError(UserApiBadRequest):
 
 class UserResource(ModelResource):
 
-    class Meta:
-        queryset = User.objects.all()
-        resource_name = 'auth/user'
-        excludes = ['password']
-        always_return_data = True
-        authorization = DjangoAuthorization()
-        authentication = SessionAuthentication()
-
-class CreateUserResource(ModelResource):
-
 
     class Meta:
-        allowed_methods = ['post']
+        allowed_methods = ['post', 'put']
         always_return_data = True
         authentication = SessionAuthentication()
         authorization = DjangoAuthorization()
         queryset = User.objects.all()
-        resource_name = 'create_user'
+        resource_name = 'entity/user'
         always_return_data = True
 
 
@@ -176,8 +166,9 @@ class CreateUserResource(ModelResource):
 
         return bundle
 
-    def obj_update(self, bundle, **kwargs):
+    def obj_update(self, bundle, request, **kwargs):
 
+        print request.user.id
         # make sure the user's id is the user id they're changing,
          # unless they are a superuser
 

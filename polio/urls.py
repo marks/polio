@@ -19,7 +19,7 @@ from tastypie.api import Api
 admin.autodiscover()
 
 ####################
-from entity.api import CreateUserResource
+from entity.api import UserResource
 ####################
 
 v1_api = Api(api_name='v1')
@@ -32,7 +32,7 @@ v1_api.register(EtlResource())
 v1_api.register(RegionPolygonResource())
 # v1_api.register(CampaignResource())
 ################
-v1_api.register(CreateUserResource())
+v1_api.register(UserResource())
 ################
 
 
