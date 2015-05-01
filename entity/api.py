@@ -41,6 +41,12 @@ REGEX_VALID_PASSWORD = (
     ## Minimum 8 characters
     '{' + str(MINIMUM_PASSWORD_LENGTH) + ',}$')
 
+#TODO
+ALPHA_NUM_UNDERSCORE_ONLY = ''
+
+#TODO
+PROBABLY_AN_EMAIL = ''
+
 def valid_password(password):
 
     if re.match(REGEX_VALID_PASSWORD, password):
