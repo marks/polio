@@ -151,8 +151,8 @@ def api_user(request):
     if 'limit' in request.GET:
         limit = int(request.GET['limit'])
     my_users = [ MyUser(pk=u.id).get_dict() for u in users ]
-    my_users = my_users[offset:offset+limit]
     total_count = len(my_users)
+    my_users = my_users[offset:offset+limit]
     resp = {}
     resp['error'] = None
     resp['meta'] = {
