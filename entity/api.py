@@ -89,7 +89,6 @@ class CreateUserResource(ModelResource):
 
     def hydrate(self, bundle):
 
-        #TODO: add groups
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
@@ -176,3 +175,12 @@ class CreateUserResource(ModelResource):
                 field='username')
 
         return bundle
+
+    def obj_update(self, bundle, **kwargs):
+
+        # make sure the user's id is the user id they're changing,
+         # unless they are a superuser
+
+        # if id given
+            # check email
+            # if they don't match error out
