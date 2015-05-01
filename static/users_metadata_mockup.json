@@ -102,7 +102,7 @@
 			"constraints": {
 				"required": true,
                 "unique": true,
-                "pattern": ".{0,75}"
+                "pattern": "^[a-zA-Z0-9._]+\\@[a-zA-Z0-9._]+\\.[a-zA-Z]{3,}$"
 			},
 			"sortable": true,
 			"searchable": true,

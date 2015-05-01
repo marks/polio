@@ -46,7 +46,7 @@ REGEX_VALID_PASSWORD = (
 ALPHA_NUM = '[A-Za-z0-9 _]{3,30}$'
 
 #TODO
-EMAIL = '.{0,75}'
+EMAIL = '^[a-zA-Z0-9._]+\@[a-zA-Z0-9._]+\.[a-zA-Z]{3,}$'
 
 
 
