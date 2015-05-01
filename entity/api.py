@@ -67,6 +67,18 @@ class UserPasswordError(UserApiBadRequest):
         UserApiBadRequest.__init__(self, message="Invalid Password. Please Enter a password at least 8 characters long with no spaces, at least one digit, at least one uppercase letter, and at least one special character such as: *%$#@!?)(",
             field='password')
 
+class UserCannotEditError(UserApiBadRequest):
+
+    def __init__(self, field):
+        UserApiBadRequest.__init__(self, message="Cannot be edited by user",
+            field=field)
+
+class BadFormattingException(UserApiBadRequest):
+
+    def __init__(self, field):
+        UserApiBadRequest.__init__(self, message="Bad Formatting",
+            field=field)
+
 class UserResource(ModelResource):
 
 
@@ -82,6 +94,7 @@ class UserResource(ModelResource):
 
     def hydrate(self, bundle):
 
+        print 'hydrate'
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
@@ -89,7 +102,6 @@ class UserResource(ModelResource):
         return bundle
 
     def dehydrate(self, bundle):
-
 
         user = User.objects.get(username=bundle.obj.username)
         groups = Group.objects.raw(
@@ -121,15 +133,18 @@ class UserResource(ModelResource):
 
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
             "password")
+
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
                 raise UserApiBadRequest(field=field, message="Missing Parameter")
+
         email = bundle.data['user']['email']
         first_name = bundle.data['user']['first_name']
         last_name = bundle.data['user']['last_name']
         username = bundle.data['user']['username']
         password = bundle.data['user']['password']
         groups = bundle.data['user']['groups']
+
         if valid_password(password) == False:
             raise UserPasswordError()
         try:
@@ -167,12 +182,53 @@ class UserResource(ModelResource):
 
         return bundle
 
-    def obj_update(self, bundle, request, **kwargs):
 
-        print request.user.id
-        # make sure the user's id is the user id they're changing,
-         # unless they are a superuser
 
-        # if id given
-            # check email
-            # if they don't match error out
+    def obj_update(self, bundle, **kwargs):
+
+        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
+            "password")
+
+        for field in REQUIRED_FIELDS:
+            if field not in bundle.data['user']:
+                raise UserApiBadRequest(field=field, message="Missing Parameter")
+
+        email = bundle.data['user']['email']
+        first_name = bundle.data['user']['first_name']
+        last_name = bundle.data['user']['last_name']
+        username = bundle.data['user']['username']
+        new_groups = bundle.data['user']['groups']
+        pk = bundle.data['user']['id']
+
+        user = User.objects.get(pk=pk)
+
+        # if bundle.request.user.id != pk:
+        #   raise UserApiBadRequest(field='id', message="User can only edit self")
+
+        user.first_name = first_name
+        user.last_name = last_name
+
+        if user.email != email:
+            if not user.is_superuser:
+                raise UserCannotEditError(field='email')
+            else:
+                user.email = email
+            if user.username != username:
+                raise UserCannotEditError(field='username')
+
+        current_groups = [g.name for g in user.groups.all()]
+        for cg in current_groups:
+            if cg not in new_groups:
+                if not user.is_superuser:
+                    raise UserCannotEditError(field='groups')
+                group.user_set.remove(user)
+        for ng in new_groups:
+            if ng not in current_groups:
+                if not user.is_superuser:
+                    raise UserCannotEditError(field='groups')
+                group.user_set.add(user)
+
+        user.save()
+        bundle.obj = user
+
+        return bundle

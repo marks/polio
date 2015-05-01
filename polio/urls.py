@@ -32,7 +32,8 @@ v1_api.register(EtlResource())
 v1_api.register(RegionPolygonResource())
 # v1_api.register(CampaignResource())
 ################
-v1_api.register(UserResource())
+v2_api = Api(api_name='v2')
+v2_api.register(UserResource())
 ################
 
 
@@ -54,6 +55,8 @@ urlpatterns = patterns('',
 
     ## TASTYPIE API ##
     (r'^api/', include(v1_api.urls)),
+
+    (r'^api/', include(v2_api.urls)),
 
 
     ## Entity API ##
