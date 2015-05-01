@@ -74,9 +74,6 @@ class UserResource(ModelResource):
         authorization = DjangoAuthorization()
         authentication = SessionAuthentication()
 
-class ResetPasswordResource(ModelResource):
-    pass
-
 class CreateUserResource(ModelResource):
 
 
