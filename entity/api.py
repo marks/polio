@@ -26,6 +26,7 @@ import json
 
 models.signals.post_save.connect(create_api_key, sender=User)
 
+#TODO: set to false
 TASTYPIE_FULL_DEBUG = True
 MINIMUM_PASSWORD_LENGTH = 6
 REGEX_VALID_PASSWORD = (
