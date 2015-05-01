@@ -127,7 +127,7 @@
                 "pattern": null,
 				"items": {
 					"oneOf": [
-						{ "value": 1, "label": "UNICEF HQ" }
+						{ "value": 1 }
 					]
 				}
 			},
