@@ -123,18 +123,18 @@
 			"description": "Password",
 			"constraints": {
 				"required": true,
-                "unique": true,
+                "unique": false,
                 "pattern": "'^(?!.*[\\s])((?=.*[\\d])(?=.*[A-Z])(?=.*[^\\w\\d\\s])).{6,}$'"
 			},
-			"sortable": true,
-			"searchable": true,
+			"sortable": false,
+			"searchable": false,
 			"filterable": false,
-			"editable": true,
+			"editable": false,
 			"inputType": null,
 			"display": {
 				"on_table": false,
-				"weightTable": 3,
-				"weightForm": 3
+				"weightTable": null,
+				"weightForm": null
 			}
 		},
 
