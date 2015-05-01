@@ -117,6 +117,28 @@
 		},
 
 		{
+			"name": "password",
+			"title": "Password",
+			"type": "string",
+			"description": "Password",
+			"constraints": {
+				"required": true,
+                "unique": true,
+                "pattern": "'^(?!.*[\\s])((?=.*[\\d])(?=.*[A-Z])(?=.*[^\\w\\d\\s])).{6,}$'"
+			},
+			"sortable": true,
+			"searchable": true,
+			"filterable": false,
+			"editable": true,
+			"inputType": null,
+			"display": {
+				"on_table": false,
+				"weightTable": 3,
+				"weightForm": 3
+			}
+		},
+
+		{
 			"name": "groups",
 			"title": "Groups",
 			"type": "array",
