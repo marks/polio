@@ -38,7 +38,7 @@ class MyUser:
 
     def get_dict(self):
         s = {}
-        s['groups'] = [ {'value': g.pk, 'label': g.name } for g in self.groups ]
+        s['groups'] = [ {'value': g.pk } for g in self.groups ]
         s['id'] = self.pk
         s['first_name'] = self.first_name
         s['last_name'] = self.last_name
