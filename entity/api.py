@@ -20,6 +20,7 @@ from tastypie.authentication import Authentication as SessionAuthentication
 from tastypie.authorization import Authorization as DjangoAuthorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
+from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 
 import re
 import json
@@ -79,13 +80,19 @@ class UserResource(ModelResource):
 
 
     class Meta:
-        allowed_methods = ['post', 'put']
+        allowed_methods = ['get', 'post', 'put']
         always_return_data = True
         authentication = SessionAuthentication()
         authorization = DjangoAuthorization()
         queryset = User.objects.all()
         resource_name = 'entity/user'
         always_return_data = True
+        '''
+        filtering = {
+            'username': ['exact'],
+            'id': ['lt'],
+        }
+        '''
 
 
     def hydrate(self, bundle):
