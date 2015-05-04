@@ -9,6 +9,7 @@ from django.views import generic
 from django.contrib.auth.models import User,Group
 from django.template import RequestContext
 from django.db import IntegrityError
+from django.db.models import Q
 
 from django.utils.translation import ugettext as _
 from django.db import models
@@ -114,6 +115,34 @@ class UserShowResource(ModelResource):
                 'groups': [ g.name for g in bundle.obj.groups.all() ]
             }
         }
+
+    def build_filters(self, filters=None):
+
+        if filters is None:
+            filters = {}
+        orm_filters = super(UserShowResource, self).build_filters(filters)
+
+        if('search' in filters):
+            query = filters['search']
+            qset = (
+                    Q(first_name__icontains=query) |
+                    Q(last_name__icontains=query) |
+                    Q(email__icontains=query)
+                    )
+            orm_filters.update({'custom': qset})
+
+        return orm_filters
+
+    def apply_filters(self, request, applicable_filters):
+
+        if 'custom' in applicable_filters:
+            custom = applicable_filters.pop('custom')
+        else:
+            custom = None
+
+        semi_filtered = super(UserShowResource, self).apply_filters(request, applicable_filters)
+
+        return semi_filtered.filter(custom) if custom else semi_filtered
 
 
 
