@@ -20,6 +20,7 @@ admin.autodiscover()
 
 ####################
 from entity.api import UserResource
+from entity.api import UserShowResource
 ####################
 
 v1_api = Api(api_name='v1')
@@ -34,6 +35,7 @@ v1_api.register(RegionPolygonResource())
 ################
 v2_api = Api(api_name='v2')
 v2_api.register(UserResource())
+v2_api.register(UserShowResource())
 ################
 
 

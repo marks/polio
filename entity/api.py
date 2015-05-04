@@ -76,28 +76,61 @@ class BadFormattingException(UserApiBadRequest):
         UserApiBadRequest.__init__(self, message="Bad Formatting",
             field=field)
 
-class UserResource(ModelResource):
+class GroupResource(ModelResource):
+    class Meta:
+        queryset = Group.objects.all()
+        resource_name = 'auth/group'
 
+class UserShowResource(ModelResource):
+
+    groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True)
 
     class Meta:
-        allowed_methods = ['get', 'post', 'put']
+        allowed_methods = ['get']
+        authentication = SessionAuthentication()
+        authorization = DjangoAuthorization()
+        queryset = User.objects.all()
+        excludes = ['password']
+        resource_name = 'entity/users'
+        filtering = {
+            'username': ['exact'],
+            'id': ['lt']
+        }
+
+    def dehydrate(self, bundle):
+
+        return {
+            'error': None,
+            'success': True,
+            'error_fields': None,
+            'user': {
+                'id': bundle.obj.id,
+                'email': bundle.obj.email,
+                'username': bundle.obj.username,
+                'first_name': bundle.obj.first_name,
+                'last_name': bundle.obj.last_name,
+                'groups': [ g.name for g in bundle.obj.groups.all() ]
+            }
+        }
+
+
+
+class UserResource(ModelResource):
+
+    groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True)
+
+    class Meta:
+        allowed_methods = ['post', 'put']
         always_return_data = True
         authentication = SessionAuthentication()
         authorization = DjangoAuthorization()
         queryset = User.objects.all()
         resource_name = 'entity/user'
         always_return_data = True
-        '''
-        filtering = {
-            'username': ['exact'],
-            'id': ['lt'],
-        }
-        '''
 
 
     def hydrate(self, bundle):
 
-        print 'hydrate'
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
@@ -107,6 +140,7 @@ class UserResource(ModelResource):
     def dehydrate(self, bundle):
 
         user = User.objects.get(username=bundle.obj.username)
+        # why is this here get rid of it use groups foreign key
         groups = Group.objects.raw(
             '''
             SELECT * FROM auth_user_groups aug
