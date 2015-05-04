@@ -22,11 +22,14 @@ class CreateUserTestCase(ResourceTestCase):
         self.user = User.objects.create_user(self.username,
             'bfontecc_test@seedscientific.com', self.password)
         # create their api key?
-        self.post_url = "/api/v1/create_user/"
+        self.post_url = "/api/v2/entity/user/"
         self.get_url = "/api/v1/entity/users/"
         self.user_update = "/api/v1/entity/users/update"
         self.admin_update = "/api/v1/entity/users/admin_update" # TODO: put hash here
         self._username = 'test_user'+str(int(random.random() * 100000))
+        self.put_to_id = 1
+        self.put_url = self.post_url+self.put_to_id
+
 
     def setup_session(self):
 
@@ -54,6 +57,13 @@ class CreateUserTestCase(ResourceTestCase):
         pass
         '''
         self.assertHttpUnauthorized(self.api_client.post(self.post_url,
+            format='json', data=self.post_data))
+        '''
+
+    def test_user_put_unauthenticated(self):
+        pass
+        '''
+        self.assertHttpUnauthorized(self.api_client.put(self.put_url,
             format='json', data=self.post_data))
         '''
 
@@ -92,6 +102,7 @@ class CreateUserTestCase(ResourceTestCase):
             format='json', data=bad_data))
         self.assertEqual(User.objects.count(), initial_count)
 
+
     def test_user_post(self):
 
         good_data = {
@@ -114,12 +125,13 @@ class CreateUserTestCase(ResourceTestCase):
         # Verify a new one has been added.
         self.assertEqual(User.objects.count(), initial_count+1)
 
-    def test_get_list_json(self):
-
+    def test_user_put_missingfield(self):
         pass
 
-    def test_get_list_xml(self):
+    def test_user_put_badformat(self):
+        pass
 
+    def test_user_put(self):
         pass
 
     def test_get_detail_unauthenticated(self):
