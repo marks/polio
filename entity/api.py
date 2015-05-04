@@ -93,8 +93,10 @@ class UserShowResource(ModelResource):
         excludes = ['password']
         resource_name = 'entity/users'
         filtering = {
-            'username': ['exact'],
-            'id': ['lt']
+            'username': ALL,
+            'id': ALL,
+            'first_name': ALL,
+            'last_name': ALL
         }
 
     def dehydrate(self, bundle):
