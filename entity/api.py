@@ -46,6 +46,7 @@ REGEX_VALID_PASSWORD = (
 class GroupResource(ModelResource):
 
     class Meta:
+
         queryset = Group.objects.all()
         resource_name = 'auth/group'
 
@@ -67,6 +68,7 @@ class UserShowResource(ModelResource):
             'first_name': ALL,
             'last_name': ALL
         }
+        ordering = ['username', 'id', 'first_name', 'last_name']
 
     def dehydrate(self, bundle):
 
@@ -158,8 +160,9 @@ class UserResource(ModelResource):
 
         def retrieve_valid(data, fieldname, pattern):
 
-            if re.match(pattern, data[fieldname]) == False:
+            if re.match(pattern, data[fieldname]) == None:
                 raise BadFormattingException(fieldname)
+
             return data[fieldname]
 
         REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
@@ -174,7 +177,8 @@ class UserResource(ModelResource):
         first_name = retrieve_valid(userdata, 'first_name', ALPHA_NUM)
         last_name = retrieve_valid(userdata, 'last_name', ALPHA_NUM)
         username = retrieve_valid(userdata, 'username', ALPHA_NUM)
-        password = retrieve_valid(userdata, 'email', REGEX_VALID_PASSWORD)
+        password = retrieve_valid(userdata, 'password', REGEX_VALID_PASSWORD)
+
         groups = userdata['groups']
 
         try:
@@ -212,12 +216,9 @@ class UserResource(ModelResource):
 
         return bundle
 
-
-
     def obj_update(self, bundle, **kwargs):
 
-        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username",
-            "password")
+        REQUIRED_FIELDS = ("first_name", "last_name", "email", "username")
 
         for field in REQUIRED_FIELDS:
             if field not in bundle.data['user']:
