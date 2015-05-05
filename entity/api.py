@@ -1,27 +1,25 @@
-from django.contrib.auth.models import User,Group
-from django.shortcuts import render_to_response
-from django.http import HttpResponseRedirect
-from django.http import HttpResponse
+from django.core import serializers
 from django.core.urlresolvers import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
-from django.core import serializers
 from django.views import generic
+from django.http import HttpResponse
+from django.http import HttpResponseRedirect
+from django.shortcuts import render_to_response
 from django.contrib.auth.models import User,Group
 from django.template import RequestContext
 from django.db import IntegrityError
+from django.db import models
 from django.db.models import Q
 
-from django.utils.translation import ugettext as _
-from django.db import models
-from tastypie.models import create_api_key
-from tastypie.exceptions import TastypieError
-from tastypie.resources import ModelResource
 from tastypie import fields
+from tastypie.models import create_api_key
+from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.authentication import Authentication as SessionAuthentication
 from tastypie.authorization import Authorization as DjangoAuthorization
 from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
-from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
+
+from .exceptions import *
 
 import re
 import json
@@ -31,6 +29,8 @@ models.signals.post_save.connect(create_api_key, sender=User)
 #TODO: set to false
 TASTYPIE_FULL_DEBUG = True
 MINIMUM_PASSWORD_LENGTH = 6
+ALPHA_NUM = '[A-Za-z0-9 _]{3,30}$'
+EMAIL = '^[a-zA-Z0-9._]+\@[a-zA-Z0-9._]+\.[a-zA-Z]{3,}$'
 REGEX_VALID_PASSWORD = (
     ## Don't allow any spaces, e.g. '\t', '\n' or whitespace etc.
     r'^(?!.*[\s])'
@@ -44,40 +44,8 @@ REGEX_VALID_PASSWORD = (
     ## Minimum 8 characters
     '{' + str(MINIMUM_PASSWORD_LENGTH) + ',}$')
 
-#TODO
-ALPHA_NUM = '[A-Za-z0-9 _]{3,30}$'
-
-#TODO
-EMAIL = '^[a-zA-Z0-9._]+\@[a-zA-Z0-9._]+\.[a-zA-Z]{3,}$'
-
-
-
-class UserApiBadRequest(ImmediateHttpResponse):
-
-    def __init__(self, message="", field=""):
-        ImmediateHttpResponse.__init__(self, HttpBadRequest(content=json.dumps({
-            'error': message, 'error_fields': [field], 'success': False}),
-            content_type="application/json; charset=utf-8"))
-
-class UserPasswordError(UserApiBadRequest):
-
-    def __init__(self):
-        UserApiBadRequest.__init__(self, message="Invalid Password. Please Enter a password at least 8 characters long with no spaces, at least one digit, at least one uppercase letter, and at least one special character such as: *%$#@!?)(",
-            field='password')
-
-class UserCannotEditError(UserApiBadRequest):
-
-    def __init__(self, field):
-        UserApiBadRequest.__init__(self, message="Cannot be edited by user",
-            field=field)
-
-class BadFormattingException(UserApiBadRequest):
-
-    def __init__(self, field):
-        UserApiBadRequest.__init__(self, message="Bad Formatting",
-            field=field)
-
 class GroupResource(ModelResource):
+
     class Meta:
         queryset = Group.objects.all()
         resource_name = 'auth/group'
@@ -87,6 +55,7 @@ class UserShowResource(ModelResource):
     groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True)
 
     class Meta:
+
         allowed_methods = ['get']
         authentication = SessionAuthentication()
         authorization = DjangoAuthorization()
@@ -144,13 +113,12 @@ class UserShowResource(ModelResource):
 
         return semi_filtered.filter(custom) if custom else semi_filtered
 
-
-
 class UserResource(ModelResource):
 
     groups = fields.ManyToManyField(GroupResource, 'groups', null=True, full=True)
 
     class Meta:
+
         allowed_methods = ['post', 'put']
         always_return_data = True
         authentication = SessionAuthentication()
@@ -158,7 +126,6 @@ class UserResource(ModelResource):
         queryset = User.objects.all()
         resource_name = 'entity/user'
         always_return_data = True
-
 
     def hydrate(self, bundle):
 
@@ -169,17 +136,19 @@ class UserResource(ModelResource):
         return bundle
 
     def dehydrate(self, bundle):
-
+        '''
         user = User.objects.get(username=bundle.obj.username)
         # why is this here get rid of it use groups foreign key
         groups = Group.objects.raw(
-            '''
+            ###
             SELECT * FROM auth_user_groups aug
             JOIN auth_group ag
                 ON ag.id = aug.group_id
             WHERE aug.user_id = %s;
-            ''', [user.pk]
+            ###
+            , [user.pk]
         )
+        '''
         group_names = [ g.name for g in groups ]
         bundle.data = {
             'error': None,
@@ -200,6 +169,7 @@ class UserResource(ModelResource):
     def obj_create(self, bundle, **kwargs):
 
         def retrieve_valid(data, fieldname, pattern):
+
             if re.match(pattern, data[fieldname]) == False:
                 raise BadFormattingException(fieldname)
             return data[fieldname]
