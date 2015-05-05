@@ -25,17 +25,13 @@ import json
 
 models.signals.post_save.connect(create_api_key, sender=User)
 
-#TODO:
-# custom authorization:
- # http://django-tastypie.readthedocs.org/en/latest/authorization.html
-
 #TODO: set to false
 TASTYPIE_FULL_DEBUG = True
 MINIMUM_PASSWORD_LENGTH = 6
 ALPHA_NUM = '[A-Za-z0-9 _]{3,30}$'
 EMAIL = '^[a-zA-Z0-9._]+\@[a-zA-Z0-9._]+\.[a-zA-Z]{3,}$'
 REGEX_VALID_PASSWORD = (
-    ## Don't allow any spaces, e.g. '\t', '\n' or whitespace etc.
+    ## Don't allow any whitespace
     r'^(?!.*[\s])'
     ## Check for a digit
     '((?=.*[\d])'
@@ -140,19 +136,7 @@ class UserResource(ModelResource):
         return bundle
 
     def dehydrate(self, bundle):
-        '''
-        user = User.objects.get(username=bundle.obj.username)
-        # why is this here get rid of it use groups foreign key
-        groups = Group.objects.raw(
-            ###
-            SELECT * FROM auth_user_groups aug
-            JOIN auth_group ag
-                ON ag.id = aug.group_id
-            WHERE aug.user_id = %s;
-            ###
-            , [user.pk]
-        )
-        '''
+
         group_names = [ g.name for g in bundle.obj.groups.all() ]
         bundle.data = {
             'error': None,
@@ -246,18 +230,11 @@ class UserResource(ModelResource):
         new_groups = bundle.data['user']['groups']
         pk = bundle.data['user']['id']
 
-        #TODO: replace with custom auth
         superuser = False
         if bundle.request.user.is_superuser:
            superuser = True
 
         user = User.objects.get(pk=pk)
-
-        #TODO:
-        # move this to custom auth
-        # if not superuser:
-            # if bundle.request.user.id != pk:
-            #   raise UserApiBadRequest(field='id', message="User can only edit self")
 
         user.first_name = first_name
         user.last_name = last_name
