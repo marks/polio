@@ -16,7 +16,6 @@ from tastypie.models import create_api_key
 from tastypie.resources import ModelResource, ALL, ALL_WITH_RELATIONS
 from tastypie.authentication import Authentication as SessionAuthentication
 from tastypie.authorization import Authorization as DjangoAuthorization
-from tastypie.exceptions import ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
 from .exceptions import *
@@ -25,6 +24,10 @@ import re
 import json
 
 models.signals.post_save.connect(create_api_key, sender=User)
+
+#TODO:
+# custom authorization:
+ # http://django-tastypie.readthedocs.org/en/latest/authorization.html
 
 #TODO: set to false
 TASTYPIE_FULL_DEBUG = True
@@ -94,10 +97,11 @@ class UserShowResource(ModelResource):
         if('search' in filters):
             query = filters['search']
             qset = (
-                    Q(first_name__icontains=query) |
-                    Q(last_name__icontains=query) |
-                    Q(email__icontains=query)
-                    )
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(username__icontains=query) |
+                Q(email__icontains=query)
+            )
             orm_filters.update({'custom': qset})
 
         return orm_filters
@@ -149,13 +153,13 @@ class UserResource(ModelResource):
             , [user.pk]
         )
         '''
-        group_names = [ g.name for g in groups ]
+        group_names = [ g.name for g in bundle.obj.groups.all() ]
         bundle.data = {
             'error': None,
             'success': True,
             'error_fields': None,
             'user': {
-                'id': user.pk,
+                'id': bundle.obj.id,
                 'email': bundle.obj.email,
                 'username': bundle.obj.username,
                 'first_name': bundle.obj.first_name,
@@ -200,7 +204,7 @@ class UserResource(ModelResource):
             pass
 
         try:
-            # wrap with auth_filter
+
             user = User.objects.create_user(username, first_name=first_name,
                 last_name=last_name, email=email, password=password)
             for group_name in groups:
@@ -242,16 +246,24 @@ class UserResource(ModelResource):
         new_groups = bundle.data['user']['groups']
         pk = bundle.data['user']['id']
 
+        #TODO: replace with custom auth
+        superuser = False
+        if bundle.request.user.is_superuser:
+           superuser = True
+
         user = User.objects.get(pk=pk)
 
-        # if bundle.request.user.id != pk:
-        #   raise UserApiBadRequest(field='id', message="User can only edit self")
+        #TODO:
+        # move this to custom auth
+        # if not superuser:
+            # if bundle.request.user.id != pk:
+            #   raise UserApiBadRequest(field='id', message="User can only edit self")
 
         user.first_name = first_name
         user.last_name = last_name
 
         if user.email != email:
-            if not user.is_superuser:
+            if not superuser:
                 raise UserCannotEditError(field='email')
             else:
                 user.email = email
@@ -261,12 +273,12 @@ class UserResource(ModelResource):
         current_groups = [g.name for g in user.groups.all()]
         for cg in current_groups:
             if cg not in new_groups:
-                if not user.is_superuser:
+                if not superuser:
                     raise UserCannotEditError(field='groups')
                 group.user_set.remove(user)
         for ng in new_groups:
             if ng not in current_groups:
-                if not user.is_superuser:
+                if not superuser:
                     raise UserCannotEditError(field='groups')
                 group.user_set.add(user)
 

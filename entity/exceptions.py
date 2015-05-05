@@ -1,6 +1,8 @@
 from tastypie.exceptions import TastypieError, ImmediateHttpResponse
 from tastypie.http import HttpBadRequest, HttpAccepted
 
+import json
+
 class UserApiBadRequest(ImmediateHttpResponse):
 
     def __init__(self, message="", field=""):
