@@ -54,7 +54,6 @@ BEGIN
 		FROM region_permission rm
 		WHERE rm.user_id = $1
 		AND rt.parent_region_id = rm.region_id
-		AND rm.read_write = 'r'
 	)
   AND r.id = ANY(COALESCE($2,ARRAY[r.id]))
 
@@ -70,7 +69,6 @@ BEGIN
   INNER JOIN region_permission rp
     ON r.id = rp.region_id
 	AND rp.user_id = $1
-    AND rp.read_write = 'r'
     AND r.id = ANY(COALESCE($2,ARRAY[r.id]));
 
 END
