@@ -128,6 +128,8 @@ class BaseNonModelResource(Resource):
 
         permitted_region_ids = [r.id for r in permitted_region_qs]
 
+        print permitted_region_ids
+
         final_region_ids = list(set(region_ids).intersection(set\
             (permitted_region_ids)))
 
